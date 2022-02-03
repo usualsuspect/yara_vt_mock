@@ -1,6 +1,6 @@
 # yara\_vt\_mock
 
-This YARA module implement the same interface as the [VirusTotal vt YARA module](https://support.virustotal.com/hc/en-us/articles/360007088057-Writing-YARA-rules-for-Livehunt), making it possible to test livehunt rules against local files outside of a livehunt context.
+This YARA module implements the same interface as the [VirusTotal vt YARA module](https://support.virustotal.com/hc/en-us/articles/360007088057-Writing-YARA-rules-for-Livehunt), making it possible to test livehunt rules against local files outside of a livehunt context.
 
 To do that, a JSON file of metadata has to be supplied to the module from which it extracts the necessary information to present the same interface as the VT module would.
 
@@ -68,7 +68,7 @@ If you want to test a livehunt against a given file, you need to fetch the file'
 
 Edit in your VirusTotal API key, then let it fetch the necessary metadata:
 
-```bash
+```
 $ fetch_metadata.py <some SHA256> > /tmp/meta.json
 ```
 
