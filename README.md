@@ -1,2 +1,3 @@
 # yara_vt_mock
-Emulate the VirusTotal "vt" YARA module for local files
+
+This YARA module implement the same interface as the VirusTotal `vt` YARA module, making it possible to test livehunt rules against local files.
