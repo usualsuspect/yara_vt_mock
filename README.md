@@ -41,7 +41,24 @@ This way we can easily debug livehunt rules against certain files without having
 
 ## Installation
 
-TODO
+```bash
+git clone https://github.com/VirusTotal/yara
+git clone https://github.com/usualsuspect/yara_vt_mock
+```
+
+Then use the included script to integrate the module into the YARA repository:
+
+```bash
+yara_vt_mock/integrate.sh /path/to/yara/repo
+```
+
+Then just build YARA. At the time of writing (2022-02-03):
+```bash
+cd yara
+./build.sh
+```
+
+If all went well, you should have a `yara` binary in the YARA repository with this module included.
 
 ## Coverage
 
