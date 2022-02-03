@@ -41,12 +41,14 @@ This way we can easily debug livehunt rules against certain files without having
 
 ## Installation
 
+Fetch the repos:
+
 ```bash
 git clone https://github.com/VirusTotal/yara
 git clone https://github.com/usualsuspect/yara_vt_mock
 ```
 
-Then use the included script to integrate the module into the YARA repository:
+Then use the included script to integrate this module into the YARA repository:
 
 ```bash
 yara_vt_mock/integrate.sh /path/to/yara/repo
@@ -59,6 +61,22 @@ cd yara
 ```
 
 If all went well, you should have a `yara` binary in the YARA repository with this module included.
+
+## Usage
+
+If you want to test a livehunt against a given file, you need to fetch the file's metadata first. For that you can use the included `fetch_metadata.py` script (requires `vt` Python module).
+
+Edit in your VirusTotal API key, then let it fetch the necessary metadata:
+
+```bash
+$ fetch_metadata.py <some SHA256> > /tmp/meta.json
+```
+
+Then simply call:
+
+```bash
+$ yara -x vt=/tmp/meta.json somerule.yara somefile
+```
 
 ## Coverage
 
