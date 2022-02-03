@@ -4,7 +4,7 @@ This YARA module implement the same interface as the [VirusTotal vt YARA module]
 
 To do that, a JSON file of metadata has to be supplied to the module from which it extracts the necessary information to present the same interface as the VT module would.
 
-# Example usage
+## Example usage
 
 Suppose we have written the following (somewhat contrived) livehunt rule:
 
@@ -39,9 +39,15 @@ $ yara -x vt=/tmp/meta.json livehunt.yara somefile
 
 This way we can easily debug livehunt rules against certain files without having to wait for hits on a real livehunt.
 
+## Installation
+
+TODO
+
 ## Coverage
 
-The module currently supports all of the `vt.metadata.*` namespace. `vt.behaviour.*` might come at a later date.
+The module currently supports the complete `vt.metadata.*` namespace.
+
+`vt.behaviour.*` might come at a later date.
 
 ### Notes
 
