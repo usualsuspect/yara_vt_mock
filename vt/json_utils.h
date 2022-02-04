@@ -1,4 +1,5 @@
-#pragma once
+#ifndef JSON_UTILS_H
+#define JSON_UTILS_H
 
 #include "cJSON.h"
 
@@ -12,3 +13,5 @@ double json_obj_get_double(cJSON *json,const char *name);
 
 const char *json_get_string(cJSON *json);
 const char *json_obj_get_string(cJSON *json,const char *name);
+
+#endif
