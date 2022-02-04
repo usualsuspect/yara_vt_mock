@@ -3,7 +3,6 @@
 #include <stdlib.h>
 
 #include "cJSON.h"
-#include "utils.h"
 #include "json_utils.h"
 #include "type_mapping.h"
 
@@ -190,13 +189,13 @@ end_declarations;
 
 int module_initialize(YR_MODULE* module)
 {
-    dbg_print("module_initialize\n");
+    YR_DEBUG_FPRINTF(1,stderr,"module_initialize\n");
     return ERROR_SUCCESS;
 }
 
 int module_finalize(YR_MODULE* module)
 {
-    dbg_print("module_finalize\n");
+    YR_DEBUG_FPRINTF(1,stderr,"module_finalize\n");
     return ERROR_SUCCESS;
 }
 
@@ -205,7 +204,7 @@ int parse_vt_json(YR_OBJECT *module_object,char *json_data,size_t json_data_len)
     cJSON *json = cJSON_ParseWithLength(json_data,json_data_len);
     if(!json)
     {
-        dbg_print("Parsing JSON data failed\n");
+        YR_DEBUG_FPRINTF(1,stderr,"Parsing JSON data failed\n");
         return 1;
     }
 
@@ -250,7 +249,7 @@ int parse_vt_json(YR_OBJECT *module_object,char *json_data,size_t json_data_len)
     cJSON *array_file_name = json_get_obj(attributes,"names");
     if(array_file_name && array_file_name->child)
     {
-        dbg_print("Setting name %s\n",array_file_name->child->valuestring);
+        YR_DEBUG_FPRINTF(1,stderr,"Setting name %s\n",array_file_name->child->valuestring);
         set_string(array_file_name->child->valuestring,module_object,"metadata.file_name");
     }
 
@@ -331,7 +330,7 @@ int parse_vt_json(YR_OBJECT *module_object,char *json_data,size_t json_data_len)
             {
                 if(type_mapping[i][n])
                 {
-                    dbg_print("Adding type tag [%s]\n",type_mapping[i][n]);
+                    YR_DEBUG_FPRINTF(1,stderr,"Adding type tag [%s]\n",type_mapping[i][n]);
                     set_string(type_mapping[i][n],module_object,"metadata.file_type_tags[%i]",n);
                 }
             }
@@ -486,13 +485,13 @@ int module_load(
 {
     if(module_data_size != 0)
     {
-        dbg_print("Parsing JSON\n");
+        YR_DEBUG_FPRINTF(1,stderr,"Parsing JSON\n");
         setup_constants(module_object);
         parse_vt_json(module_object,(char *)module_data,module_data_size);
     }
     else
     {
-        dbg_print("Error: No module data specified - pass JSON via '-x vt=/path/to/json'\n");
+        YR_DEBUG_FPRINTF(1,stderr,"Error: No module data specified - pass JSON via '-x vt=/path/to/json'\n");
         return 1;
     }
     return ERROR_SUCCESS;
