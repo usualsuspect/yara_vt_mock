@@ -375,9 +375,16 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
     transfer_string(attributes, module_object, "sha1", "metadata.sha1");
     transfer_string(attributes, module_object, "sha256", "metadata.sha256");
     transfer_string(attributes, module_object, "ssdeep", "metadata.ssdeep");
-    transfer_string(attributes, module_object, "imphash", "metadata.imphash");
+    
     transfer_string(attributes, module_object, "vhash", "metadata.vhash");
     transfer_string(attributes, module_object, "magic", "metadata.magic");
+
+    // metadata.imphash
+    json_t *pe_info = json_object_get(attributes, "pe_info");
+    if(pe_info)
+    {
+        transfer_string(pe_info,module_object,"imphash","metadata.imphash");
+    }
 
     transfer_int(attributes,module_object,"times_submitted","metadata.times_submitted");
     transfer_int(attributes,module_object,"unique_sources","metadata.unique_sources");
