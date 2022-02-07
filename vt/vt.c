@@ -14,7 +14,7 @@ void dbg_print(int bla,FILE *stream, const char *fmt,...)
 {
     va_list ptr;
     va_start(ptr,fmt);
-    vfprintf(stream,fmt,ptr);
+    //vfprintf(stream,fmt,ptr);
     va_end(ptr);
 }
 
