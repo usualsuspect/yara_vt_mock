@@ -3,11 +3,20 @@
 #include <stdlib.h>
 
 #include <jansson.h>
-#include "cJSON.h"
-#include "json_utils.h"
 #include "type_mapping.h"
 
 #define MODULE_NAME vt
+
+//debug build currently (2022-02-07) broken in the YARA repo, workaround for debugging
+#define YR_DEBUG_FPRINTF dbg_print
+
+void dbg_print(int bla,FILE *stream, const char *fmt,...)
+{
+    va_list ptr;
+    va_start(ptr,fmt);
+    vfprintf(stream,fmt,ptr);
+    va_end(ptr);
+}
 
 begin_declarations;
     begin_struct("metadata");
@@ -189,13 +198,13 @@ end_declarations;
 
 int module_initialize(YR_MODULE *module)
 {
-    YR_DEBUG_FPRINTF(1, stderr, "module_initialize\n");
+    YR_DEBUG_FPRINTF(1, stderr, "%s", "module_initialize\n");
     return ERROR_SUCCESS;
 }
 
 int module_finalize(YR_MODULE *module)
 {
-    YR_DEBUG_FPRINTF(1, stderr, "module_finalize\n");
+    YR_DEBUG_FPRINTF(1, stderr, "%s", "module_finalize\n");
     return ERROR_SUCCESS;
 }
 
@@ -208,7 +217,7 @@ void transfer_string(json_t *obj, YR_OBJECT *module_object, const char *source_n
     }
     if (!json_is_object(obj))
     {
-        YR_DEBUG_FPRINTF(1, stderr, "transfer_string called on non-object\n");
+        YR_DEBUG_FPRINTF(1, stderr, "%s", "transfer_string called on non-object\n");
         return;
     }
     json_t *val = json_object_get(obj, source_name);
@@ -224,7 +233,7 @@ void transfer_string(json_t *obj, YR_OBJECT *module_object, const char *source_n
         return;
     }
 
-    char *valstring = json_string_value(val);
+    const char *valstring = json_string_value(val);
     set_string(valstring, module_object, dest_name);
 }
 
@@ -237,7 +246,7 @@ void transfer_int(json_t *obj, YR_OBJECT *module_object, const char *source_name
     }
     if (!json_is_object(obj))
     {
-        YR_DEBUG_FPRINTF(1, stderr, "transfer_int called on non-object\n");
+        YR_DEBUG_FPRINTF(1, stderr, "%s", "transfer_int called on non-object\n");
         return;
     }
     json_t *val = json_object_get(obj, source_name);
@@ -247,21 +256,27 @@ void transfer_int(json_t *obj, YR_OBJECT *module_object, const char *source_name
         return;
     }
 
-    if (!json_is_integer(val))
+    int value = 0;
+    if(json_is_real(val))
     {
-        YR_DEBUG_FPRINTF(1, stderr, "transfer_int - source %s not a string\n", source_name);
-        return;
+        value = (int)json_real_value(val);
     }
-
-    int intval = json_integer_value(val);
-    set_integer(intval, module_object, dest_name);
+    else if(json_is_integer(val))
+    {
+        value = json_integer_value(val);
+    }
+    else
+    {
+        YR_DEBUG_FPRINTF(1, stderr, "transfer_int - source %s not an integer/real\n", source_name);
+    }
+    set_integer(value, module_object, dest_name);
 }
 
 int safe_get_integer(json_t *obj, const char *valname)
 {
     if (!obj)
     {
-        YR_DEBUG_FPRINTF(1, stderr, "safe_get_integer called on non-object\n");
+        YR_DEBUG_FPRINTF(1, stderr, "%s", "safe_get_integer called on nullptr\n");
         return 0;
     }
     json_t *val = json_object_get(obj, valname);
@@ -270,12 +285,35 @@ int safe_get_integer(json_t *obj, const char *valname)
         YR_DEBUG_FPRINTF(1, stderr, "safe_get_integer - value %s not found\n", valname);
         return 0;
     }
-    if (!json_is_integer(val))
+    if(json_is_real(val))
     {
-        YR_DEBUG_FPRINTF(1, stderr, "safe_get_integer - %s not an integer\n", valname);
+        return (int)json_real_value(val);
+    }
+    else if(json_is_integer(val))
+    {
+        return json_integer_value(val);
+    }
+    else
+    {
+        YR_DEBUG_FPRINTF(1,stderr,"safe_get_integer %s is not int/real\n",valname); 
         return 0;
     }
-    return json_integer_value(val);
+}
+
+const char *safe_get_string(json_t *obj, const char *valname)
+{
+    if(!obj)
+    {
+        YR_DEBUG_FPRINTF(1,stderr, "safe_get_string(%s) called on nullptr\n",valname);
+        return NULL;
+    }
+    json_t *val = json_object_get(obj,valname);
+    if(!json_is_string(val))
+    {
+        YR_DEBUG_FPRINTF(1,stderr, "safe_get_string(%s) called on non-string\n",valname);
+        return NULL;
+    }
+    return json_string_value(val);
 }
 
 int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_len)
@@ -284,14 +322,14 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
     json_t *root = json_loads(json_data, json_data_len, &err);
     if (!root)
     {
-        YR_DEBUG_FPRINTF(1, stderr, "Parsing JSON data failed\n");
+        YR_DEBUG_FPRINTF(1, stderr, "%s", "Parsing JSON data failed\n");
         return 1;
     }
 
     json_t *data = json_object_get(root, "data");
     if (!data)
     {
-        YR_DEBUG_FPRINTF(1, stderr, "No data object in JSON");
+        YR_DEBUG_FPRINTF(1, stderr, "%s", "No data object in JSON");
         json_decref(root);
         return 1;
     }
@@ -299,7 +337,7 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
     json_t *attributes = json_object_get(data, "attributes");
     if (!attributes)
     {
-        YR_DEBUG_FPRINTF(1, stderr, "No attributes object in JSON");
+        YR_DEBUG_FPRINTF(1, stderr, "%s", "No attributes object in JSON");
         json_decref(root);
         return 1;
     }
@@ -331,18 +369,8 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
     }
 
     transfer_int(attributes, module_object, "first_submission_date", "metadata.first_submission_date");
-
-    // get filename from names array, we use the 1st entry if available
-    // TODO: Could also use "meaningful_name"
-    cJSON *array_file_name = json_get_obj(attributes, "names");
-    if (array_file_name && array_file_name->child)
-    {
-        YR_DEBUG_FPRINTF(1, stderr, "Setting name %s\n", array_file_name->child->valuestring);
-        set_string(array_file_name->child->valuestring, module_object, "metadata.file_name");
-    }
-
-    set_integer(json_obj_get_int(attributes, "size"), module_object, "metadata.file_size");
-
+    transfer_string(attributes,module_object,"meaningful_name","metadata.file_name");
+    transfer_int(attributes,module_object,"size","metadata.file_size");
     transfer_string(attributes, module_object, "md5", "metadata.md5");
     transfer_string(attributes, module_object, "sha1", "metadata.sha1");
     transfer_string(attributes, module_object, "sha256", "metadata.sha256");
@@ -371,42 +399,54 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
     }
 
     // metadata.tags
-    cJSON *tags = json_get_obj(attributes, "tags");
-    cJSON *tag = tags->child;
-    for (int i = 0; tag != NULL; ++i, tag = tag->next)
+    json_t *tags = json_object_get(attributes,"tags");
+    if(tags && json_is_array(tags))
     {
-        set_string(tag->valuestring, module_object, "metadata.tags[%i]", i);
+        for(int i = 0; i < json_array_size(tags); ++i)
+        {
+            json_t *tag = json_array_get(tags,i);
+            if (tag && json_is_string(tag))
+            {
+                const char *tag_string = json_string_value(tag);
+                if (tag_string)
+                {
+                    set_string(tag_string,module_object,"metadata.tags[%i]",i);
+                }
+            }
+        }
     }
 
     // metadata.signatures
-    cJSON *lar = json_get_obj(attributes, "last_analysis_results");
-    for (cJSON *av = lar->child; av != NULL; av = av->next)
+    json_t *last_analysis_results = json_object_get(attributes,"last_analysis_results");
+    if(last_analysis_results && json_is_object(last_analysis_results))
     {
-        cJSON *res = json_get_obj(av, "result");
-        if (cJSON_IsNull(res))
+        const char *avname;
+        json_t *val;
+
+        json_object_foreach(last_analysis_results,avname,val)
         {
-            // FIXME: leave undefined?
-        }
-        else
-        {
-            set_string(res->valuestring, module_object, "metadata.signatures[%s]", av->string);
+            const char *res = safe_get_string(val,"result");
+            if(res)
+            {
+                set_string(res,module_object,"metadata.signatures[%s]",avname);
+            }
         }
     }
 
     // metadata.submitter
-    cJSON *submitter = json_get_obj(attributes, "submitter");
-    if (submitter)
+    json_t *submitter = json_object_get(attributes,"submitter");
+    if(submitter)
     {
-        set_string(json_obj_get_string(submitter, "country"), module_object, "metadata.submitter.country");
-        set_string(json_obj_get_string(submitter, "city"), module_object, "metadata.submitter.city");
+        transfer_string(submitter,module_object,"country","metadata.submitter.country");
+        transfer_string(submitter,module_object,"city","metadata.submitter.city");
     }
 
     // metadata.file_type
     // lookup json["type_tag"] in our mapping struct
-    cJSON *type_tag = json_get_obj(attributes, "type_tag");
+    const char *type_tag = safe_get_string(attributes,"type_tag");
     for (size_t i = 0; i < sizeof(type_mapping) / sizeof(type_mapping[0]); ++i)
     {
-        if (!strcmp(type_tag->valuestring, type_mapping[i][0]))
+        if (!strcmp(type_tag, type_mapping[i][0]))
         {
             set_integer(i, module_object, "metadata.file_type");
 
@@ -422,6 +462,8 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
             break;
         }
     }
+
+    json_decref(root);
     return 0;
 }
 
@@ -569,13 +611,13 @@ int module_load(
 {
     if (module_data_size != 0)
     {
-        YR_DEBUG_FPRINTF(1, stderr, "Parsing JSON\n");
+        YR_DEBUG_FPRINTF(1, stderr, "%s", "Parsing JSON\n");
         setup_constants(module_object);
         parse_vt_json(module_object, (char *)module_data, module_data_size);
     }
     else
     {
-        YR_DEBUG_FPRINTF(1, stderr, "Error: No module data specified - pass JSON via '-x vt=/path/to/json'\n");
+        YR_DEBUG_FPRINTF(1, stderr, "%s", "Error: No module data specified - pass JSON via '-x vt=/path/to/json'\n");
         return 1;
     }
     return ERROR_SUCCESS;
