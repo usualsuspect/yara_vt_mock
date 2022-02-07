@@ -2,7 +2,7 @@
 
 This YARA module implements the same interface as the [VirusTotal vt YARA module](https://support.virustotal.com/hc/en-us/articles/360007088057-Writing-YARA-rules-for-Livehunt), making it possible to test livehunt rules against local files outside of a livehunt context.
 
-To do that, a JSON file of metadata has to be supplied to the module from which it extracts the necessary information to present the same interface as the VT module would.
+To do that, a JSON file of metadata has to be supplied to the module, from which it extracts the necessary information to present the same interface as the VT module would.
 
 ## Example usage
 
@@ -12,7 +12,7 @@ Suppose we have written the following (somewhat contrived) livehunt rule:
 $ cat livehunt.yara
 import "vt"
 
-rule 
+rule mock_test
 {
     condition:
         vt.metadata.new_file
@@ -34,14 +34,15 @@ rule
 Using the included utility script we fetch all necessary metadata into `/tmp/meta.json` and can then simply call:
 
 ```
-$ yara -x vt=/tmp/meta.json livehunt.yara somefile
+$ yara -x vt=/tmp/meta.json livehunt.yara /tmp/testfile
+mock_test /tmp/testfile
 ```
 
 This way we can easily debug livehunt rules against certain files without having to wait for hits on a real livehunt.
 
 ## Installation
 
-Fetch the repos:
+Fetch the source repos:
 
 ```bash
 git clone https://github.com/VirusTotal/yara
@@ -54,17 +55,22 @@ Then use the included script to integrate this module into the YARA repository:
 yara_vt_mock/integrate.sh /path/to/yara/repo
 ```
 
-Then just build YARA. At the time of writing (2022-02-03):
+Then build YARA. We need to include the cuckoo module so we get access to the Jansson JSON library (the cuckoo module has build magic for it already).
+
+At the time of writing (2022-02-07), this would be:
+
 ```bash
 cd yara
-./build.sh
+./bootstrap.sh
+./configure --enable-cuckoo
+make
 ```
 
 If all went well, you should have a `yara` binary in the YARA repository with this module included.
 
 ## Usage
 
-If you want to test a livehunt against a given file, you need to fetch the file's metadata first. For that you can use the included `fetch_metadata.py` script (requires `vt` Python module).
+If you want to test a livehunt YARA rule against a given file, you need to fetch the file's metadata first. For that you can use the included `fetch_metadata.py` script (requires `vt` Python module).
 
 Edit in your VirusTotal API key, then let it fetch the necessary metadata:
 
