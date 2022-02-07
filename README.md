@@ -14,8 +14,11 @@ import "vt"
 
 rule mock_test
 {
+    strings:
+        $somestring = "abcd"
     condition:
-        vt.metadata.new_file
+        $somestring at 0
+        and vt.metadata.new_file
         and vt.metadata.exiftool["MIMEType"] == "application/msword"
         and for any tag in vt.metadata.tags : (
             tag == "macros"
@@ -29,6 +32,7 @@ rule mock_test
         and vt.metadata.submitter.country == "MX"
         and vt.metadata.submitter.city contains "mexico"
 }
+
 ```
 
 Using the included utility script we fetch all necessary metadata into `/tmp/meta.json` and can then simply call:
