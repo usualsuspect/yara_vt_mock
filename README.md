@@ -112,6 +112,10 @@ set_integer(1,module_object,"metadata.new_file");
 
 This way you can freely test your rules even if the target file was submitted multiple times.
 
-#### vt.submitter.*
+#### vt.metadata.submitter.*
 
 As livehunts are called on a submission basis, there is only one possible value for the submitter. In our case though, we might get a list of submissions if a file has been submitted multiple times. This module uses the first entry (and thus latest submission) to fill the `vt.submitter.*` structure.
+
+#### vt.metadata.file_name
+
+This field is currently sourced from the `meaningful_name` field from the metadata JSON.
