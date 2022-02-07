@@ -53,10 +53,11 @@ git clone https://github.com/VirusTotal/yara
 git clone https://github.com/usualsuspect/yara_vt_mock
 ```
 
-Then use the included script to integrate this module into the YARA repository:
+Then use the included script to integrate this module into the YARA source repository:
 
 ```bash
-yara_vt_mock/integrate.sh /path/to/yara/repo
+cd yara_vt_mock
+./integrate.sh /path/to/yara/repo
 ```
 
 Then build YARA. We need to include the cuckoo module so we get access to the Jansson JSON library (the cuckoo module has build magic for it already).
