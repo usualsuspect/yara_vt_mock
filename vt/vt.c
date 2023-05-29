@@ -234,7 +234,7 @@ void transfer_string(json_t *obj, YR_OBJECT *module_object, const char *source_n
     }
 
     const char *valstring = json_string_value(val);
-    set_string(valstring, module_object, dest_name);
+    yr_set_string(valstring, module_object, dest_name);
 }
 
 void transfer_int(json_t *obj, YR_OBJECT *module_object, const char *source_name, const char *dest_name)
@@ -269,7 +269,7 @@ void transfer_int(json_t *obj, YR_OBJECT *module_object, const char *source_name
     {
         YR_DEBUG_FPRINTF(1, stderr, "transfer_int - source %s not an integer/real\n", source_name);
     }
-    set_integer(value, module_object, dest_name);
+    yr_set_integer(value, module_object, dest_name);
 }
 
 int safe_get_integer(json_t *obj, const char *valname)
@@ -363,7 +363,7 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
         {
             if (json_is_string(val))
             {
-                set_string(json_string_value(val), module_object, "metadata.exiftool[%s]", key);
+                yr_set_string(json_string_value(val), module_object, "metadata.exiftool[%s]", key);
             }
         }
     }
@@ -390,12 +390,12 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
     transfer_int(attributes,module_object,"unique_sources","metadata.unique_sources");
 
     // metadata.subfile - always set to false
-    set_integer(0, module_object, "metadata.subfile");
+    yr_set_integer(0, module_object, "metadata.subfile");
 
     // metadata.new_file
     int first_sub = safe_get_integer(attributes, "first_submission_date");
     int last_sub = safe_get_integer(attributes, "last_submission_date");
-    set_integer(first_sub == last_sub, module_object, "metadata.new_file");
+    yr_set_integer(first_sub == last_sub, module_object, "metadata.new_file");
 
     // metadata.main_icon
     json_t *main_icon = json_object_get(attributes, "main_icon");
@@ -417,7 +417,7 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
                 const char *tag_string = json_string_value(tag);
                 if (tag_string)
                 {
-                    set_string(tag_string,module_object,"metadata.tags[%i]",i);
+                    yr_set_string(tag_string,module_object,"metadata.tags[%i]",i);
                 }
             }
         }
@@ -435,7 +435,7 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
             const char *res = safe_get_string(val,"result");
             if(res)
             {
-                set_string(res,module_object,"metadata.signatures[%s]",avname);
+                yr_set_string(res,module_object,"metadata.signatures[%s]",avname);
             }
         }
     }
@@ -455,7 +455,7 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
     {
         if (!strcmp(type_tag, type_mapping[i][0]))
         {
-            set_integer(i, module_object, "metadata.file_type");
+            yr_set_integer(i, module_object, "metadata.file_type");
 
             // now apply the respective file type tags
             for (int n = 1; n < sizeof(type_mapping[i]) / sizeof(char *); ++n)
@@ -463,7 +463,7 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
                 if (type_mapping[i][n])
                 {
                     YR_DEBUG_FPRINTF(1, stderr, "Adding type tag [%s]\n", type_mapping[i][n]);
-                    set_string(type_mapping[i][n], module_object, "metadata.file_type_tags[%i]", n);
+                    yr_set_string(type_mapping[i][n], module_object, "metadata.file_type_tags[%i]", n);
                 }
             }
             break;
@@ -476,138 +476,138 @@ int parse_vt_json(YR_OBJECT *module_object, char *json_data, size_t json_data_le
 
 void setup_constants(YR_OBJECT *module_object)
 {
-    set_integer(0, module_object, "FileType.ACE");
-    set_integer(1, module_object, "FileType.ANDROID");
-    set_integer(2, module_object, "FileType.APPLE");
-    set_integer(3, module_object, "FileType.APPLE_PLIST");
-    set_integer(4, module_object, "FileType.APPLEDOUBLE");
-    set_integer(5, module_object, "FileType.APPLESINGLE");
-    set_integer(6, module_object, "FileType.ARC");
-    set_integer(7, module_object, "FileType.ARJ");
-    set_integer(8, module_object, "FileType.ASD");
-    set_integer(9, module_object, "FileType.ASF");
-    set_integer(10, module_object, "FileType.AVI");
-    set_integer(11, module_object, "FileType.AWK");
-    set_integer(12, module_object, "FileType.BMP");
-    set_integer(13, module_object, "FileType.BZIP");
-    set_integer(14, module_object, "FileType.C");
-    set_integer(15, module_object, "FileType.CAB");
-    set_integer(16, module_object, "FileType.CAP");
-    set_integer(17, module_object, "FileType.CHM");
-    set_integer(18, module_object, "FileType.COFF");
-    set_integer(19, module_object, "FileType.COOKIE");
-    set_integer(20, module_object, "FileType.CPP");
-    set_integer(21, module_object, "FileType.CRX");
-    set_integer(22, module_object, "FileType.DEB");
-    set_integer(23, module_object, "FileType.DIB");
-    set_integer(24, module_object, "FileType.DIVX");
-    set_integer(25, module_object, "FileType.DMG");
-    set_integer(26, module_object, "FileType.DOC");
-    set_integer(27, module_object, "FileType.DOCX");
-    set_integer(28, module_object, "FileType.DOS_COM");
-    set_integer(29, module_object, "FileType.DOS_EXE");
-    set_integer(30, module_object, "FileType.DYALOG");
-    set_integer(31, module_object, "FileType.DZIP");
-    set_integer(32, module_object, "FileType.EBOOK");
-    set_integer(33, module_object, "FileType.ELF");
-    set_integer(34, module_object, "FileType.EMAIL");
-    set_integer(35, module_object, "FileType.EMF");
-    set_integer(36, module_object, "FileType.EOT");
-    set_integer(37, module_object, "FileType.FLAC");
-    set_integer(38, module_object, "FileType.FLC");
-    set_integer(39, module_object, "FileType.FLI");
-    set_integer(40, module_object, "FileType.FLV");
-    set_integer(41, module_object, "FileType.FORTRAN");
-    set_integer(42, module_object, "FileType.FPX");
-    set_integer(43, module_object, "FileType.GIF");
-    set_integer(44, module_object, "FileType.GIMP");
-    set_integer(45, module_object, "FileType.GUL");
-    set_integer(46, module_object, "FileType.GZIP");
-    set_integer(47, module_object, "FileType.HTML");
-    set_integer(48, module_object, "FileType.HWP");
-    set_integer(49, module_object, "FileType.ICO");
-    set_integer(50, module_object, "FileType.IN_DESIGN");
-    set_integer(51, module_object, "FileType.IPHONE");
-    set_integer(52, module_object, "FileType.ISOIMAGE");
-    set_integer(53, module_object, "FileType.JAR");
-    set_integer(54, module_object, "FileType.JAVA");
-    set_integer(55, module_object, "FileType.JAVA_BYTECODE");
-    set_integer(56, module_object, "FileType.JAVASCRIPT");
-    set_integer(57, module_object, "FileType.JNG");
-    set_integer(58, module_object, "FileType.JPEG");
-    set_integer(59, module_object, "FileType.KGB");
-    set_integer(60, module_object, "FileType.LATEX");
-    set_integer(61, module_object, "FileType.LINUX");
-    set_integer(62, module_object, "FileType.LINUX_KERNEL");
-    set_integer(63, module_object, "FileType.LNK");
-    set_integer(64, module_object, "FileType.MACH_O");
-    set_integer(65, module_object, "FileType.MACINTOSH");
-    set_integer(66, module_object, "FileType.MACINTOSH_HFS");
-    set_integer(67, module_object, "FileType.MACINTOSH_LIB");
-    set_integer(68, module_object, "FileType.MIDI");
-    set_integer(69, module_object, "FileType.MOV");
-    set_integer(70, module_object, "FileType.MP3");
-    set_integer(71, module_object, "FileType.MP4");
-    set_integer(72, module_object, "FileType.MPEG");
-    set_integer(73, module_object, "FileType.MSCOMPRESS");
-    set_integer(74, module_object, "FileType.MSI");
-    set_integer(75, module_object, "FileType.NE_DLL");
-    set_integer(76, module_object, "FileType.NE_EXE");
-    set_integer(77, module_object, "FileType.ODF");
-    set_integer(78, module_object, "FileType.ODG");
-    set_integer(79, module_object, "FileType.ODP");
-    set_integer(80, module_object, "FileType.ODS");
-    set_integer(81, module_object, "FileType.ODT");
-    set_integer(82, module_object, "FileType.OGG");
-    set_integer(83, module_object, "FileType.OUTLOOK");
-    set_integer(84, module_object, "FileType.PALMOS");
-    set_integer(85, module_object, "FileType.PASCAL");
-    set_integer(86, module_object, "FileType.PDF");
-    set_integer(87, module_object, "FileType.PE_DLL");
-    set_integer(88, module_object, "FileType.PE_EXE");
-    set_integer(89, module_object, "FileType.PERL");
-    set_integer(90, module_object, "FileType.PHP");
-    set_integer(91, module_object, "FileType.PKG");
-    set_integer(92, module_object, "FileType.PNG");
-    set_integer(93, module_object, "FileType.PPSX");
-    set_integer(94, module_object, "FileType.PPT");
-    set_integer(95, module_object, "FileType.PPTX");
-    set_integer(96, module_object, "FileType.PS");
-    set_integer(97, module_object, "FileType.PSD");
-    set_integer(98, module_object, "FileType.PYTHON");
-    set_integer(99, module_object, "FileType.QUICKTIME");
-    set_integer(100, module_object, "FileType.RAR");
-    set_integer(101, module_object, "FileType.RM");
-    set_integer(102, module_object, "FileType.ROM");
-    set_integer(103, module_object, "FileType.RPM");
-    set_integer(104, module_object, "FileType.RTF");
-    set_integer(105, module_object, "FileType.RUBY");
-    set_integer(106, module_object, "FileType.RZIP");
-    set_integer(107, module_object, "FileType.SCRIPT");
-    set_integer(108, module_object, "FileType.SEVENZIP");
-    set_integer(109, module_object, "FileType.SHELLSCRIPT");
-    set_integer(110, module_object, "FileType.SVG");
-    set_integer(111, module_object, "FileType.SWF");
-    set_integer(112, module_object, "FileType.SYMBIAN");
-    set_integer(113, module_object, "FileType.T3GP");
-    set_integer(114, module_object, "FileType.TAR");
-    set_integer(115, module_object, "FileType.TARGA");
-    set_integer(116, module_object, "FileType.TEXT");
-    set_integer(117, module_object, "FileType.TIFF");
-    set_integer(118, module_object, "FileType.TORRENT");
-    set_integer(119, module_object, "FileType.TTF");
-    set_integer(120, module_object, "FileType.WAV");
-    set_integer(121, module_object, "FileType.WINCE");
-    set_integer(122, module_object, "FileType.WMA");
-    set_integer(123, module_object, "FileType.WMV");
-    set_integer(124, module_object, "FileType.WOFF");
-    set_integer(125, module_object, "FileType.XLS");
-    set_integer(126, module_object, "FileType.XLSX");
-    set_integer(127, module_object, "FileType.XML");
-    set_integer(128, module_object, "FileType.XPI");
-    set_integer(129, module_object, "FileType.XWD");
-    set_integer(130, module_object, "FileType.ZIP");
-    set_integer(131, module_object, "FileType.ZLIB");
+    yr_set_integer(0, module_object, "FileType.ACE");
+    yr_set_integer(1, module_object, "FileType.ANDROID");
+    yr_set_integer(2, module_object, "FileType.APPLE");
+    yr_set_integer(3, module_object, "FileType.APPLE_PLIST");
+    yr_set_integer(4, module_object, "FileType.APPLEDOUBLE");
+    yr_set_integer(5, module_object, "FileType.APPLESINGLE");
+    yr_set_integer(6, module_object, "FileType.ARC");
+    yr_set_integer(7, module_object, "FileType.ARJ");
+    yr_set_integer(8, module_object, "FileType.ASD");
+    yr_set_integer(9, module_object, "FileType.ASF");
+    yr_set_integer(10, module_object, "FileType.AVI");
+    yr_set_integer(11, module_object, "FileType.AWK");
+    yr_set_integer(12, module_object, "FileType.BMP");
+    yr_set_integer(13, module_object, "FileType.BZIP");
+    yr_set_integer(14, module_object, "FileType.C");
+    yr_set_integer(15, module_object, "FileType.CAB");
+    yr_set_integer(16, module_object, "FileType.CAP");
+    yr_set_integer(17, module_object, "FileType.CHM");
+    yr_set_integer(18, module_object, "FileType.COFF");
+    yr_set_integer(19, module_object, "FileType.COOKIE");
+    yr_set_integer(20, module_object, "FileType.CPP");
+    yr_set_integer(21, module_object, "FileType.CRX");
+    yr_set_integer(22, module_object, "FileType.DEB");
+    yr_set_integer(23, module_object, "FileType.DIB");
+    yr_set_integer(24, module_object, "FileType.DIVX");
+    yr_set_integer(25, module_object, "FileType.DMG");
+    yr_set_integer(26, module_object, "FileType.DOC");
+    yr_set_integer(27, module_object, "FileType.DOCX");
+    yr_set_integer(28, module_object, "FileType.DOS_COM");
+    yr_set_integer(29, module_object, "FileType.DOS_EXE");
+    yr_set_integer(30, module_object, "FileType.DYALOG");
+    yr_set_integer(31, module_object, "FileType.DZIP");
+    yr_set_integer(32, module_object, "FileType.EBOOK");
+    yr_set_integer(33, module_object, "FileType.ELF");
+    yr_set_integer(34, module_object, "FileType.EMAIL");
+    yr_set_integer(35, module_object, "FileType.EMF");
+    yr_set_integer(36, module_object, "FileType.EOT");
+    yr_set_integer(37, module_object, "FileType.FLAC");
+    yr_set_integer(38, module_object, "FileType.FLC");
+    yr_set_integer(39, module_object, "FileType.FLI");
+    yr_set_integer(40, module_object, "FileType.FLV");
+    yr_set_integer(41, module_object, "FileType.FORTRAN");
+    yr_set_integer(42, module_object, "FileType.FPX");
+    yr_set_integer(43, module_object, "FileType.GIF");
+    yr_set_integer(44, module_object, "FileType.GIMP");
+    yr_set_integer(45, module_object, "FileType.GUL");
+    yr_set_integer(46, module_object, "FileType.GZIP");
+    yr_set_integer(47, module_object, "FileType.HTML");
+    yr_set_integer(48, module_object, "FileType.HWP");
+    yr_set_integer(49, module_object, "FileType.ICO");
+    yr_set_integer(50, module_object, "FileType.IN_DESIGN");
+    yr_set_integer(51, module_object, "FileType.IPHONE");
+    yr_set_integer(52, module_object, "FileType.ISOIMAGE");
+    yr_set_integer(53, module_object, "FileType.JAR");
+    yr_set_integer(54, module_object, "FileType.JAVA");
+    yr_set_integer(55, module_object, "FileType.JAVA_BYTECODE");
+    yr_set_integer(56, module_object, "FileType.JAVASCRIPT");
+    yr_set_integer(57, module_object, "FileType.JNG");
+    yr_set_integer(58, module_object, "FileType.JPEG");
+    yr_set_integer(59, module_object, "FileType.KGB");
+    yr_set_integer(60, module_object, "FileType.LATEX");
+    yr_set_integer(61, module_object, "FileType.LINUX");
+    yr_set_integer(62, module_object, "FileType.LINUX_KERNEL");
+    yr_set_integer(63, module_object, "FileType.LNK");
+    yr_set_integer(64, module_object, "FileType.MACH_O");
+    yr_set_integer(65, module_object, "FileType.MACINTOSH");
+    yr_set_integer(66, module_object, "FileType.MACINTOSH_HFS");
+    yr_set_integer(67, module_object, "FileType.MACINTOSH_LIB");
+    yr_set_integer(68, module_object, "FileType.MIDI");
+    yr_set_integer(69, module_object, "FileType.MOV");
+    yr_set_integer(70, module_object, "FileType.MP3");
+    yr_set_integer(71, module_object, "FileType.MP4");
+    yr_set_integer(72, module_object, "FileType.MPEG");
+    yr_set_integer(73, module_object, "FileType.MSCOMPRESS");
+    yr_set_integer(74, module_object, "FileType.MSI");
+    yr_set_integer(75, module_object, "FileType.NE_DLL");
+    yr_set_integer(76, module_object, "FileType.NE_EXE");
+    yr_set_integer(77, module_object, "FileType.ODF");
+    yr_set_integer(78, module_object, "FileType.ODG");
+    yr_set_integer(79, module_object, "FileType.ODP");
+    yr_set_integer(80, module_object, "FileType.ODS");
+    yr_set_integer(81, module_object, "FileType.ODT");
+    yr_set_integer(82, module_object, "FileType.OGG");
+    yr_set_integer(83, module_object, "FileType.OUTLOOK");
+    yr_set_integer(84, module_object, "FileType.PALMOS");
+    yr_set_integer(85, module_object, "FileType.PASCAL");
+    yr_set_integer(86, module_object, "FileType.PDF");
+    yr_set_integer(87, module_object, "FileType.PE_DLL");
+    yr_set_integer(88, module_object, "FileType.PE_EXE");
+    yr_set_integer(89, module_object, "FileType.PERL");
+    yr_set_integer(90, module_object, "FileType.PHP");
+    yr_set_integer(91, module_object, "FileType.PKG");
+    yr_set_integer(92, module_object, "FileType.PNG");
+    yr_set_integer(93, module_object, "FileType.PPSX");
+    yr_set_integer(94, module_object, "FileType.PPT");
+    yr_set_integer(95, module_object, "FileType.PPTX");
+    yr_set_integer(96, module_object, "FileType.PS");
+    yr_set_integer(97, module_object, "FileType.PSD");
+    yr_set_integer(98, module_object, "FileType.PYTHON");
+    yr_set_integer(99, module_object, "FileType.QUICKTIME");
+    yr_set_integer(100, module_object, "FileType.RAR");
+    yr_set_integer(101, module_object, "FileType.RM");
+    yr_set_integer(102, module_object, "FileType.ROM");
+    yr_set_integer(103, module_object, "FileType.RPM");
+    yr_set_integer(104, module_object, "FileType.RTF");
+    yr_set_integer(105, module_object, "FileType.RUBY");
+    yr_set_integer(106, module_object, "FileType.RZIP");
+    yr_set_integer(107, module_object, "FileType.SCRIPT");
+    yr_set_integer(108, module_object, "FileType.SEVENZIP");
+    yr_set_integer(109, module_object, "FileType.SHELLSCRIPT");
+    yr_set_integer(110, module_object, "FileType.SVG");
+    yr_set_integer(111, module_object, "FileType.SWF");
+    yr_set_integer(112, module_object, "FileType.SYMBIAN");
+    yr_set_integer(113, module_object, "FileType.T3GP");
+    yr_set_integer(114, module_object, "FileType.TAR");
+    yr_set_integer(115, module_object, "FileType.TARGA");
+    yr_set_integer(116, module_object, "FileType.TEXT");
+    yr_set_integer(117, module_object, "FileType.TIFF");
+    yr_set_integer(118, module_object, "FileType.TORRENT");
+    yr_set_integer(119, module_object, "FileType.TTF");
+    yr_set_integer(120, module_object, "FileType.WAV");
+    yr_set_integer(121, module_object, "FileType.WINCE");
+    yr_set_integer(122, module_object, "FileType.WMA");
+    yr_set_integer(123, module_object, "FileType.WMV");
+    yr_set_integer(124, module_object, "FileType.WOFF");
+    yr_set_integer(125, module_object, "FileType.XLS");
+    yr_set_integer(126, module_object, "FileType.XLSX");
+    yr_set_integer(127, module_object, "FileType.XML");
+    yr_set_integer(128, module_object, "FileType.XPI");
+    yr_set_integer(129, module_object, "FileType.XWD");
+    yr_set_integer(130, module_object, "FileType.ZIP");
+    yr_set_integer(131, module_object, "FileType.ZLIB");
 }
 
 int module_load(
